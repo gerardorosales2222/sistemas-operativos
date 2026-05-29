@@ -2,7 +2,7 @@
 
 # Sistemas Operativos
 
-> Esta guia no es para administradores de servidores. Está pensada para que cuando escribas código, entiendas **qué está pasando y qué aspectos del SO tener en cuenta**.
+> Esta guía no es para administradores de servidores. Está pensada para que cuando escribas código, entiendas **qué está pasando y qué aspectos del SO tener en cuenta**.
 
 ---
 
@@ -30,73 +30,74 @@ Cuando hacés doble clic en un `.exe` (o corrés `./programa`):
 | **Shell** | La ventana de comandos (bash, cmd) | El recepcionista que toma tus pedidos |
 | **Loader** | El que copia tu programa del disco a la RAM | El cadete que lleva el libro al estante |
 
+---
+
+## Administración de Memoria y Protección
+
 ### ¿Qué hace el Sistema Operativo mientras tu programa corre?
 
-El SO hace tres cosas todo el tiempo:
+El SO realiza tres tareas fundamentales de manera continua para garantizar la estabilidad del sistema:
 
-1. **Asigna memoria**: le da a tu proceso un bloque de cajones y dice "estos son tuyos, no toques los de otros".
-2. **Administra el tiempo**: cada pocos milisegundos, le dice a la CPU "dejá de atender al proceso A, atendé al B". (Se llama **scheduling**).
-3. El SO recibe el aviso y **mata el proceso** con el error "**segmentation fault**" (SEGV).
+1. **Asignación de memoria**: Le otorga a cada proceso un bloque específico de "cajones" y delimita de forma estricta sus fronteras: *"estos son tuyos, no podés tocar los de otros"*.
+2. **Administración del tiempo (Planificación/Scheduling)**: Cada pocos milisegundos, el SO le indica a la CPU: *"dejá de atender al proceso A por un instante, pasa a atender al proceso B"*.
+3. **Protección de memoria**: Si un proceso intenta violar la asignación del punto 1 e invadir el espacio asignado a otro programa o al propio sistema, el SO interviene inmediatamente y **mata el proceso** emitiendo el error genérico **"segmentation fault"** (SEGV).
 
-> **Traducción:** "Segmentation fault" significa *"intentaste escribir en memoria que no te pertenece"*.
+> **Traducción:** "Segmentation fault" significa de forma literal: *"intentaste escribir o leer en una dirección de memoria que no te pertenece"*.
 
 #### ¿Cómo sabe la CPU qué departamentos le pertenecen a cada proceso?
 
-Acá entra el **MMU (Memory Management Unit)** — un componente físico dentro del procesador.
+Acá entra en juego el **MMU (Memory Management Unit)**, un componente físico clave integrado dentro del propio procesador.
 
-El SO le dice al MMU:  
+El SO configura el MMU de la siguiente manera:  
 *"El proceso A solo puede tocar las direcciones virtuales 0 a 99, que yo las traduzco a las físicas 100 a 199"*.  
 *"El proceso B solo puede tocar virtuales 0 a 99, que yo las traduzco a físicas 200 a 299"*.
 
-
 | Dirección virtual (la que ve el programa) | Dirección física real (el cajón de la RAM) |
 |-------------------------------------------|---------------------------------------------|
-| 0 a 99 (proceso A) | 100 a 199 |
-| 0 a 99 (proceso B) | 200 a 299 |
+| 0 a 99 (proceso A)                        | 100 a 199                                   |
+| 0 a 99 (proceso B)                        | 200 a 299                                   |
 
 **Esto es genial porque:**  
-- El proceso A **cree** que tiene la memoria desde 0 hasta 99.  
-- El proceso B **también cree** que tiene la memoria desde 0 hasta 99.  
-- Pero el MMU los manda a lugares **diferentes y separados**.
+* El proceso A **cree** que tiene la memoria en exclusiva desde 0 hasta 99.  
+* El proceso B **también cree** que posee la memoria desde 0 hasta 99.  
+* Sin embargo, el MMU traduce esas peticiones en tiempo real y los redirige a lugares físicos **completamente diferentes y separados**.
 
-Si el proceso A intenta escribir en su "dirección virtual 150" (que no le corresponde porque él solo tiene 0-99), el MMU le dice **"no existe"** y genera un **segmentation fault**.
-
-### Los espacios en la memoria de un proceso
-
-Cuando tu programa se carga en RAM, se divide en **tres zonas** (como un placard ordenado):
-
-### Los espacios en la memoria de un proceso 
-
-| Zona | ¿Qué guarda? | ¿Hacia dónde crece? |
-|------|--------------|---------------------|
-| **PILA (stack)** | Variables locales, parámetros de funciones, direcciones de retorno | Hacia **abajo** (direcciones decrecientes) |
-| *(espacio libre)* | Memoria disponible para usar | - |
-| **MONTÓN (heap)** | Memoria pedida con `new` o `malloc` | Hacia **arriba** (direcciones crecientes) |
-| **DATOS** | Variables globales, constantes, estáticas | No crece (tamaño fijo) |
-| **CÓDIGO** | Las instrucciones del programa (el .exe en RAM) | No crece (tamaño fijo) |
-
-**Visualización simplificada (arriba = direcciones altas, abajo = direcciones bajas):**
-
-![Diagrama del layout de memoria de un proceso, mostrando las secciones de Código, Datos, Montón y Pila.](https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Program_memory_layout.pdf/page1-250px-Program_memory_layout.pdf.jpg)
-
-### ¿Dónde se guarda cada variable? (ejemplos en C++)
-
-Usando el diagrama de memoria que vimos, a continuación una **tabla** que relaciona cada tipo de variable con su zona:
-
-| Tipo de variable | Ejemplo en C++ | ¿Dónde se guarda? | ¿Quién la borra? |
-|------------------|----------------|-------------------|------------------|
-| Variable local (dentro de una función) | `int nro1;` | **PILA (stack)** | Solo sale de la función → se borra sola |
-| Parámetro de función | `void suma(int a, int b)` | **PILA (stack)** | Al salir de la función → se borran solos |
-| Variable global (fuera de cualquier función) | `int contador = 0;` | **DATOS** | Al terminar el programa |
-| Variable estática dentro de función | `static int veces = 0;` | **DATOS** | Al terminar el programa |
-| Memoria pedida con `new` | `int* p = new int(5);` | **MONTÓN (heap)** | LA DEBÉS BORRAR con `delete` |
-| El puntero en sí mismo (la variable `p`) | `int* p;` | **PILA** (si es local) | Se borra solo (pero lo que apunta NO) |
-| Constante literal | `"Hola mundo"` | **DATOS** (sección read-only) | Al terminar el programa |
-| El código de tu función | `void main() { ... }` | **CÓDIGO** | Al terminar el programa |
+Si el proceso A intenta forzar una escritura en una "dirección virtual 150" (fuera de su rango asignado de 0-99), el MMU detecta la infracción de hardware, le avisa al SO que "la dirección es inválida" y el Kernel detiene el proceso lanzando el **segmentation fault**.
 
 ---
 
-### Ejemplo completo para que veas dónde va cada cosa
+### Los espacios en la memoria de un proceso
+
+Cuando tu programa se carga en la memoria RAM, el espacio asignado se divide en **cuatro zonas principales** perfectamente estructuradas (como un placard ordenado):
+
+| Zona | ¿Qué guarda? | ¿Hacia dónde crece? |
+|------|--------------|---------------------|
+| **PILA (stack)** | Variables locales, parámetros de funciones, direcciones de retorno. | Hacia **abajo** (direcciones decrecientes). |
+| *(espacio libre)* | Memoria dinámica disponible para demandas del programa. | - |
+| **MONTÓN (heap)** | Memoria solicitada dinámicamente en tiempo de ejecución (`new` o `malloc`). | Hacia **arriba** (direcciones crecientes). |
+| **DATOS** | Variables globales, constantes literales y variables estáticas. | No crece (tamaño fijo precalculado). |
+| **CÓDIGO (text)** | Las instrucciones binarias del programa (el ejecutable en sí). | No crece (tamaño fijo de solo lectura). |
+
+**Visualización del layout de memoria (arriba = direcciones altas, abajo = direcciones bajas):**
+
+![Diagrama del layout de memoria de un proceso](https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Program_memory_layout.pdf/page1-250px-Program_memory_layout.pdf.jpg)
+
+### ¿Dónde se guarda cada variable? (ejemplos en C++)
+
+Relación directa entre las variables que escribimos en el código y su zona correspondiente en el mapa de memoria:
+
+| Tipo de variable | Ejemplo en C++ | ¿Dónde se guarda? | Ciclo de vida / ¿Quién la borra? |
+|------------------|----------------|-------------------|----------------------------------|
+| Variable local (dentro de una función) | `int nro1;` | **PILA (stack)** | Se libera automáticamente al salir del bloque o función. |
+| Parámetro de función | `void suma(int a, int b)` | **PILA (stack)** | Se destruye automáticamente al retornar de la función. |
+| Variable global (fuera de funciones) | `int contador = 0;` | **DATOS** | Persiste durante toda la vida del programa. |
+| Variable estática dentro de función | `static int veces = 0;` | **DATOS** | Mantiene su valor y persiste hasta terminar el programa. |
+| Memoria pedida dinámicamente | `int* p = new int(5);` | **MONTÓN (heap)** | **Obligatorio:** El desarrollador debe liberarla con `delete`. |
+| El puntero en sí mismo (referencia local) | `int* p;` | **PILA** (si es local) | Se borra solo al salir del bloque (¡pero lo que apunta en el Heap no!). |
+| Constante literal (texto fijo) | `"Hola mundo"` | **DATOS** (Sección Read-Only) | Persiste durante toda la ejecución. |
+| El código de tu función / lógica | `void main() { ... }` | **CÓDIGO** | Se descarga de la memoria al terminar el programa. |
+
+### Ejemplo práctico demostrativo en código
 
 ```cpp
 #include <iostream>
@@ -104,15 +105,15 @@ Usando el diagrama de memoria que vimos, a continuación una **tabla** que relac
 // Variable GLOBAL → va a la zona de DATOS
 int contador_global = 10;
 
-void miFuncion(int parametro) {  // 'parametro' va a la PILA
-    // Variable LOCAL → va a la PILA
+void miFuncion(int parametro) {  // 'parametro' va a la PILA (Stack)
+    // Variable LOCAL → va a la PILA (Stack)
     int variable_local = 5;
     
-    // Variable ESTÁTICA → va a DATOS (aunque esté dentro de una función)
+    // Variable ESTÁTICA → va a DATOS (mantiene su valor entre llamadas)
     static int llamadas = 0;
     llamadas++;
     
-    // Memoria dinámica → va al MONTÓN (HEAP)
+    // Memoria dinámica → el contenido (100) va al MONTÓN (HEAP)
     int* puntero_heap = new int(100);
     
     std::cout << "Dirección de variable_local (PILA): " << &variable_local << std::endl;
@@ -122,7 +123,7 @@ void miFuncion(int parametro) {  // 'parametro' va a la PILA
     std::cout << "Dirección en el MONTÓN (lo que apunta puntero_heap): " << puntero_heap << std::endl;
     std::cout << "Dirección del PUNTERO en sí (PILA): " << &puntero_heap << std::endl;
     
-    // ¡IMPORTANTE! Liberar la memoria del montón
+    // ¡IMPORTANTE! Liberar manualmente la memoria del montón para evitar fugas (Memory Leaks)
     delete puntero_heap;
 }
 
@@ -132,7 +133,7 @@ int main() {
 }
 ```
 
-## 1. Procesos: un programa que está corriendo
+## 1. Procesos: un programa en ejecución
 
 ### La analogía del restaurant
 Imaginá que un **programa** (ej: `calculadora.exe`) es como una **receta de cocina** escrita en un papel.  
@@ -185,3 +186,12 @@ Asincrónico: un solo cocinero, pero mientras el agua hierve (espera), corta ver
 Cuando tu programa pasa mucho tiempo esperando (una base de datos, un API web, el disco duro).
 En lugar de tener 1000 hilos al pedo, un solo hilo hace otras cosas mientras espera.
 
+---
+
+## Marco Teórico y Bibliografía de Cátedra
+
+Los conceptos presentados en esta guía práctica han sido adaptados a partir de la literatura clásica de ingeniería de software y sistemas operativos. Para profundizar en la teoría de la administración de memoria, concurrencia y ciclo de vida de procesos, se recomienda consultar:
+
+1. **Tanenbaum, A. S., & Bos, H.** (2015). *Sistemas Operativos Modernos*. Pearson Educación. (Referencia clave para la distinción de espacios de usuario/kernel, hilos y estados de procesos).
+2. **Silberschatz, A., Galvin, P. B., & Gagne, G.** (2018). *Operating System Concepts*. Wiley. (Fundamento principal para el modelo de traducción de la MMU, paginación y segmentación de memoria).
+3. **Stallings, W.** (2012). *Sistemas Operativos: Aspectos Internos y Principios de Diseño*. Prentice Hall. (Estructura formal del layout de memoria de un proceso: Stack, Heap, Datos y Código).
