@@ -43,7 +43,7 @@ En lugar de direcciones físicas de memoria compartidas, el SO le da a tu progra
 
 Como programador, esto nos simplifica la vida: interactuás con abstracciones cómodas mediante líneas de código simples, y el SO se encarga de traducirlas al lenguaje de máquina.
 
-### 3. Un pequeño gran matiz: ¿Por qué de "Propósito General"?
+### 2.3. Un pequeño gran matiz: ¿Por qué de "Propósito General"?
 Clasificamos al software que estamos estudiando como de propósito general (como Linux, Windows o macOS) porque está diseñado para ser flexible. Su meta no es resolver una tarea final específica del usuario (como editar una foto, reproducir música o gestionar una base de datos), sino proveer un entorno robusto, seguro y adaptable capaz de ejecutar cualquier aplicación que decidas instalar o programar.
 
 > El Sistema Operativo transforma un conjunto de cables, chips y discos hostiles en un entorno predecible, seguro y cómodo. Gracias a que el SO administra los recursos con eficiencia y nos provee abstracciones amigables, entoncs nosotros podemos concentrarnos en lo realmente importante: escribir la lógica de negocio.
