@@ -8,9 +8,9 @@ Esta guía está pensada como un recurso práctico para que usted como futuro De
 
 ## 1. ¿Qué es un Sistema Operativo?
 
-```text 
-"Un Sistema Operativo es un Software de Propósito General que hace de nexo entre el Hardware y los Programas de Usuario."
-```
+
+#### "Un Sistema Operativo es un Software de Propósito General que hace de nexo entre el Hardware y los Programas de Usuario."
+
 
 Para entender el rol de un Sistema Operativo (SO), la literatura clásica de las Ciencias de la Computación (con autores fundamentales como Andrew Tanenbaum, Abraham Silberschatz y William Stallings) nos invita a mirar este "nexo" a través de dos funciones esenciales que definen el día a día de una computadora.
 
