@@ -1,16 +1,60 @@
 ![Static Badge](https://img.shields.io/badge/Sistemas_Operativos-I.C.S_6030-blue)
 
-# Sistemas Operativos
 
-> Esta guía no es para administradores de servidores. Está pensada para que cuando escribas código, entiendas **qué está pasando y qué aspectos del SO tener en cuenta**.
+# Guia sobre Sistemas Operativos
+**Profesor Gerardo Rosales**
+
+Esta guía está pensada como un recurso práctico para que usted como futuro Desarrollador de Software comprenda cómo el sistema operativo influye en la ejecución de sus programas, administrando recursos y ofreciendo abstracciones que se traducen en competencias aplicables en su futuro laboral.
+
+## 1. ¿Qué es un Sistema Operativo?
+
+```text 
+"Un Sistema Operativo es un Software de Propósito General que hace de nexo entre el Hardware y los Programas de Usuario."
+```
+
+Para entender el rol de un Sistema Operativo (SO), la literatura clásica de las Ciencias de la Computación (con autores fundamentales como Andrew Tanenbaum, Abraham Silberschatz y William Stallings) nos invita a mirar este "nexo" a través de dos funciones esenciales que definen el día a día de una computadora.
+
+## 2. Las Dos Funciones Esenciales (Las dos caras de una misma moneda)
+Comprender estas dos funciones va a permitir entender por qué el código realizado por nosotros los desarrolladores de Software se comporta como se comporta.
+
+### 2.1. El nexo hacia el Hardware: El Administrador de Recursos
+La perspectiva del sistema: Desde este punto de vista, la meta principal del SO es la eficiencia y el orden.
+
+Imaginemos un sistema complejo lleno de piezas: procesadores, memoria RAM, almacenamiento e interfaces de red. ¿Qué pasaría si tres programas que escribiste intentaran usar el mismo recurso físico al mismo tiempo? Por ejemplo, si intentaran escribir en el mismo sector del disco o enviar datos en el mismo instante por la red de forma directa. El resultado sería un caos absoluto de datos corruptos y colisiones.
+
+Aquí es donde Silberschatz y Stallings definen al SO como un árbitro, intermediario y controlador. Cuando programamos, nosotros no manejamos el hardware directamente; le pedimos permiso al SO. El sistema operativo se encarga de:
+
+Llevar un registro de qué programas están usando qué recursos.
+
+Asigna de forma justa el tiempo de CPU y el espacio en la memoria RAM.
+
+Mediar en los conflictos cuando dos o más procesos compiten por el mismo componente físico.
+
+### 2.2 El nexo hacia el Usuario y el Programador: La Máquina Extendida (o Virtual)
+La perspectiva del desarrollo: Desde este punto de vista, la meta principal del SO es la comodidad y la abstracción.
+
+La arquitectura real de una computadora a nivel de lenguaje máquina (instrucciones primitivas, voltajes eléctricos, controladores de interrupciones) es increíblemente compleja y hostil. Si para guardar un dato de tu aplicación tuvieras que programar los pulsos magnéticos o eléctricos de una unidad de almacenamiento, tardarías meses en desarrollar un software simple.
+
+Aquí es donde brilla la visión de Andrew Tanenbaum, quien explica que el SO funciona como una Máquina Extendida o Virtual. El SO "oculta la verdad" sobre el hardware complejo y nos regala una abstracción limpia y de alto nivel:
+
+En lugar de sectores físicos en un disco, el SO nos da archivos y carpetas.
+
+En lugar de direcciones físicas de memoria compartidas, el SO le da a tu programa su propio espacio de memoria virtual protegido.
+
+Como programador, esto nos simplifica la vida: interactuás con abstracciones cómodas mediante líneas de código simples, y el SO se encarga de traducirlas al lenguaje de máquina.
+
+### 3. Un pequeño gran matiz: ¿Por qué de "Propósito General"?
+Clasificamos al software que estamos estudiando como de propósito general (como Linux, Windows o macOS) porque está diseñado para ser flexible. Su meta no es resolver una tarea final específica del usuario (como editar una foto, reproducir música o gestionar una base de datos), sino proveer un entorno robusto, seguro y adaptable capaz de ejecutar cualquier aplicación que decidas instalar o programar.
+
+> El Sistema Operativo transforma un conjunto de cables, chips y discos hostiles en un entorno predecible, seguro y cómodo. Gracias a que el SO administra los recursos con eficiencia y nos provee abstracciones amigables, entoncs nosotros podemos concentrarnos en lo realmente importante: escribir la lógica de negocio.
+
 
 ---
-
-## ¿Cómo llega un programa a ejecutarse?
+## 3. ¿Cómo llega un programa a ejecutarse?
 
 ### La analogía del estante de libros (la memoria RAM)
 
-Imaginá que la **memoria RAM** es un **enorme estante con cajones numerados** (cada cajón es un "byte").  
+Imaginemos que la **memoria RAM** es un **enorme estante con cajones numerados** (cada cajón es un "byte").  
 El **disco duro** es una **biblioteca gigante** donde guardás libros (programas) cuando la computadora está apagada.
 
 Cuando hacés doble clic en un `.exe` (o corrés `./programa`):
